@@ -161,6 +161,23 @@ The primary goal is to provide an interactive analytics solution that helps:
 
 ---
 
+# ⚙️ Setup & Reproduction Instructions
+
+To explore or reproduce this dashboard locally:
+
+### Prerequisites
+* Power BI Desktop (latest version) — [Download here](https://powerbi.microsoft.com/desktop/)
+
+### Steps
+1. Clone this repository
+git clone https://github.com/parmarth009/Air-BNB-Dashboard.git
+2. Download the dataset from [Maven Analytics](https://mavenanalytics.io/data-playground/airbnb-listings-reviews) or use the files from the `/data` folder
+3. Open `Air Bnb Dashboard.pbit` in Power BI Desktop
+4. When prompted, point the data source to the downloaded CSV files
+5. Refresh the data and the dashboard will load with all visuals
+
+---
+
 # 🚀 Future Improvements
 
 * Add predictive analytics for booking trends

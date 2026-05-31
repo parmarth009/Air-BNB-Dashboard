@@ -268,14 +268,9 @@ The **Net Sentiment Score of 57,461** is a strong baseline — but with targeted
 - [Power BI Desktop](https://powerbi.microsoft.com/desktop/) (latest version)
 - [Python 3.x](https://www.python.org/downloads/) (for running the sentiment script)
 
-### Step 2 — Clone or Download This Repository
+### Step 2 — Download This Repository
 
-**Option A — Clone via Git:**
-```bash
-git clone https://github.com/parmarth009/Air-BNB-Dashboard.git
-```
-
-**Option B — Download ZIP:** Click the green **Code** button → Download ZIP → Extract on your computer.
+Click the green **Code** button → **Download ZIP** → Extract on your computer.
 
 ### Step 3 — Download the Dataset
 

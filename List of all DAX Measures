@@ -1,0 +1,160 @@
+# Power BI DAX Measures
+
+## 1. Accuracy
+Accuracy =
+AVERAGE(Listings[review_scores_accuracy])
+
+## 2. Avg Nightly Price
+Avg Nightly Price =
+AVERAGE(Listings[price])
+
+## 3. Avg Price
+Avg Price =
+AVERAGE(Listings[price])
+
+## 4. Avg Rating
+Avg Rating =
+AVERAGE(Listings[review_scores_rating])
+
+## 5. City Rank
+City Rank =
+RANKX(
+    ALL(Listings[city]),
+    [Total Listing],
+    ,
+    DESC
+)
+
+## 6. Cleanliness
+Cleanliness =
+AVERAGE(Listings[review_scores_cleanliness])
+
+## 7. Communication
+Communication =
+AVERAGE(Listings[review_scores_communication])
+
+## 8. Cumulative %
+Cumulative % =
+DIVIDE(
+    [Cumulative Listings],
+    CALCULATE(
+        [Total Listing],
+        ALL(Listings[city])
+    )
+)
+
+## 9. Cumulative Listings
+Cumulative Listings =
+VAR CurrentRank =
+    MAXX(
+        VALUES(Listings[city]),
+        [City Rank]
+    )
+RETURN
+    CALCULATE(
+        [Total Listing],
+        FILTER(
+            ALL(Listings[city]),
+            [City Rank] <= CurrentRank
+        )
+    )
+
+## 10. Entire Place
+Entire Place =
+CALCULATE(
+    COUNT(Listings[listing_id]),
+    Listings[room_type] = "Entire place"
+)
+
+## 11. Hotel Room
+Hotel Room =
+CALCULATE(
+    COUNT(Listings[listing_id]),
+    Listings[room_type] = "Hotel room"
+)
+
+## 12. Location
+Location =
+AVERAGE(Listings[review_scores_location])
+
+## 13. Net Sentiment Score
+Net Sentiment Score =
+CALCULATE(
+    COUNTROWS(listings_with_sentiment),
+    listings_with_sentiment[sentiment] = "Positive"
+)
+-
+CALCULATE(
+    COUNTROWS(listings_with_sentiment),
+    listings_with_sentiment[sentiment] = "Negative"
+)
+
+## 14. No Superhost Listings
+No Superhost Listings =
+CALCULATE(
+    COUNT(Listings[listing_id]),
+    Listings[host_is_superhost] = "f"
+)
+
+## 15. Private Room
+Private Room =
+CALCULATE(
+    COUNT(Listings[listing_id]),
+    Listings[room_type] = "Private room"
+)
+
+## 16. Shared Room
+Shared Room =
+CALCULATE(
+    COUNT(Listings[listing_id]),
+    Listings[room_type] = "Shared room"
+)
+
+## 17. Superhost Listings
+Superhost Listings =
+CALCULATE(
+    COUNT(Listings[listing_id]),
+    Listings[host_is_superhost] = "t"
+)
+
+## 18. Total Listing
+Total Listing =
+COUNT(Listings[listing_id])
+
+## 19. Value
+Value =
+AVERAGE(Listings[review_scores_value])
+
+## 20. Cumulative % Review Frequency
+Cumulative % Review Frequency =
+DIVIDE(
+    [Cumulative Reviewers],
+    [Total Reviewers]
+)
+
+## 21. Cumulative Reviewers
+Cumulative Reviewers =
+VAR CurrentReviews =
+    MAX(Reviews[Reviews per Reviewer])
+RETURN
+    CALCULATE(
+        DISTINCTCOUNT(Reviews[reviewer_id]),
+        FILTER(
+            ALL(Reviews[Reviews per Reviewer]),
+            Reviews[Reviews per Reviewer] <= CurrentReviews
+        )
+    )
+
+## 22. Reviewers
+Reviewers =
+DISTINCTCOUNT(Reviews[reviewer_id])
+
+## 23. Reviews per Reviewer
+Reviews per Reviewer =
+CALCULATE(
+    COUNT(Reviews[review_id]),
+    ALLEXCEPT(
+        Reviews,
+        Reviews[reviewer_id]
+    )
+)

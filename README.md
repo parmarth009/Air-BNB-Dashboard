@@ -55,7 +55,6 @@ The dashboard enables faster strategic decisions using interactive visuals and K
 | **Python (pandas)** | Sentiment classification & data preprocessing |
 | **DAX** | KPI calculations, measures, and business logic |
 | **Data Modeling** | Relationship building, schema optimization |
-| **Power Query** | Data cleaning and transformation |
 | **Excel / CSV** | Source data handling |
 
 ---
@@ -499,6 +498,14 @@ Air-BNB-Dashboard/
 3. Select the CSV files as the data source
 4. Click **Load** and let Power BI refresh
 5. All visuals will populate automatically ✔
+
+---
+
+## ❓ Frequently Asked Questions
+
+Have questions about the data cleaning process, sentiment methodology, data model design, DAX measures, or future roadmap?
+
+📄 **[Read the full FAQs here](https://github.com/parmarth009/Global-Airbnb-Performance-Dashboard-Power-BI/blob/Dev/Frequently%20Asked%20Questions%20.md)**
 
 ---
 

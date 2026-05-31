@@ -248,6 +248,8 @@ Shared Room has almost **negligible sentiment volume**, signaling either very lo
 
 ### 📝 Sentiment Analysis Conclusion
 
+📄 **Want to read the full detailed Sentiment Analysis Report?** [Click here](https://github.com/parmarth009/Global-Airbnb-Performance-Dashboard-Power-BI/blob/Dev/sentimental%20analysis%20report.pdf)
+
 The analysis reveals that Airbnb sits at a critical inflection point. With **55.02% positive sentiments**, the brand enjoys majority customer satisfaction — but the **34.48% negative sentiment rate** and the steady post-2015 decline in positivity are clear warning signs.
 
 The biggest opportunities lie in:

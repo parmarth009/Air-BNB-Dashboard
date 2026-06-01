@@ -12,8 +12,7 @@ This dashboard helps stakeholders understand:
 - Host trust & verification patterns
 - Seasonal demand trends and market performance
 - **Customer sentiment patterns across 2,79,712 reviews** *(new in dev branch)*
-
-The project transforms raw Airbnb data into an interactive decision-making tool for identifying growth opportunities, customer trends, and operational risks.
+- **Booking win probability estimation via Monte Carlo Simulation** *(new in dev branch)*
 
 ---
 
@@ -27,6 +26,7 @@ Airbnb operates across multiple cities with thousands of listings, hosts, and re
 - Identify seasonal demand fluctuations
 - Compare performance across property types and cities
 - **Detect declining sentiment trends before they impact revenue**
+- **Estimate the probability of a listing being booked compared to competing listings based on price, review score, and instant booking availability**
 
 Without centralized analytics, business teams may struggle to make data-driven decisions regarding expansion, pricing strategy, customer trust, and host performance.
 
@@ -42,6 +42,7 @@ This Power BI dashboard provides a centralized analytical view of Airbnb platfor
 - Identifying seasonal demand patterns
 - Comparing room types and city-level performance
 - **Surfacing sentiment breakdowns (positive / neutral / negative) by room type and time period**
+- **Simulating 1,00,000 booking scenarios to estimate how price, review score, and instant booking affect a listing's competitive win probability**
 
 The dashboard enables faster strategic decisions using interactive visuals and KPI-driven insights.
 
@@ -53,6 +54,7 @@ The dashboard enables faster strategic decisions using interactive visuals and K
 |------|---------|
 | **Power BI** | Dashboard development & data visualization |
 | **Python (pandas)** | Sentiment classification & data preprocessing |
+| **Python (numpy, scipy)** | Monte Carlo Simulation for booking win probability |
 | **DAX** | KPI calculations, measures, and business logic |
 | **Data Modeling** | Relationship building, schema optimization |
 | **Excel / CSV** | Source data handling |
@@ -83,12 +85,14 @@ Sourced from [Maven Analytics Data Playground](https://www.mavenanalytics.io/dat
 - Demand seasonality understanding
 - Property performance comparison
 - **Revenue risk quantification from negative sentiment**
+- **Booking win probability estimation to guide host pricing and quality decisions**
 
 ### 📈 Key Visuals Included
 
 **KPI Cards**
 - Total Listings · Total Hosts · Property Types · Total Reviews · Cities Covered
 - **Net Sentiment Score · Positive / Neutral / Negative Sentiment Counts**
+- **Avg Nightly Price · Avg Rating · Avg Review Accuracy · Instant Bookable %**
 
 **Trend Analysis**
 - Listing growth over time
@@ -109,60 +113,29 @@ Sourced from [Maven Analytics Data Playground](https://www.mavenanalytics.io/dat
 - Monthly demand trends
 - Geographic demand comparison
 
+**Monte Carlo Simulation**
+- **Booking win probability by review score (3.5 to 5.0)**
+- **Impact of instant booking and price on competitive positioning**
+
 ---
 
 ## 🧠 Sentiment Analysis Report
 
 > **Scope:** 2,79,712 reviews analyzed across all cities and room types.
 
----
+### ⚙️ How Sentiment Was Calculated
 
-### ⚙️ How Sentiment & Net Sentiment Score Were Calculated
-
-Since the Airbnb dataset used in this project **does not contain textual review comments**, traditional NLP-based sentiment analysis (e.g. VADER, TextBlob) was not applicable.
-
-Instead, a **score-based sentiment classification** approach was used, leveraging the `review_scores_rating` column from `Listings.csv`. This column stores an aggregated guest satisfaction score **out of 100** for each listing.
-
-Each listing was classified into one of three sentiment categories using the following thresholds:
+Since the dataset does not contain textual review comments, a **score-based classification** was used on `review_scores_rating` from `Listings.csv`:
 
 | Sentiment | Condition | Interpretation |
 |-----------|-----------|----------------|
-| ✅ Positive | review_scores_rating ≥ 90 | Guest had a great experience |
-| ⚠️ Neutral | review_scores_rating between 70 and 89 | Guest had an average experience |
-| ❌ Negative | review_scores_rating < 70 | Guest had a poor experience |
+| ✅ Positive | rating ≥ 90 | Great experience |
+| ⚠️ Neutral | rating 70–89 | Average experience |
+| ❌ Negative | rating < 70 | Poor experience |
 
-These thresholds were chosen based on industry-standard customer satisfaction benchmarks, where scores above 90% indicate high satisfaction and scores below 70% signal significant dissatisfaction.
+Classification was done via **Python (pandas)** using `sentiment.py`. Output saved as `listings_with_sentiment.csv` and imported into Power BI.
 
-This classification was performed using **Python (pandas)** via the `sentiment.py` script included in this repository. The output was saved as `listings_with_sentiment.csv` and imported into **Power BI** to power the Sentiment Analysis dashboard page.
-
-**The Net Sentiment Score** is then calculated by subtracting the total count of **Negative** sentiment listings from the total count of **Positive** sentiment listings:
-
-```
-Net Sentiment Score = Count(Positive Sentiments) − Count(Negative Sentiments)
-```
-
-In Power BI, this was implemented as a DAX measure:
-
-```DAX
-Net Sentiment Score =
-CALCULATE(
-    COUNTROWS(listings_with_sentiment),
-    listings_with_sentiment[sentiment] = "Positive"
-)
--
-CALCULATE(
-    COUNTROWS(listings_with_sentiment),
-    listings_with_sentiment[sentiment] = "Negative"
-)
-```
-
-**Applied to this dataset:**
-
-```
-Net Sentiment Score = 1,53,907 (Positive) − 96,446 (Negative) = 57,461
-```
-
-A **positive Net Sentiment Score** indicates that satisfied customers outnumber dissatisfied ones. The higher the score, the stronger the overall customer satisfaction health of the platform.
+**Net Sentiment Score = Count(Positive) − Count(Negative) = 1,53,907 − 96,446 = 57,461**
 
 ---
 
@@ -177,88 +150,75 @@ A **positive Net Sentiment Score** indicates that satisfied customers outnumber 
 
 ---
 
-### 🔴 Finding 1 — Negative Sentiment is a Revenue Threat
+### 🔑 Key Findings & Recommendations
 
-With **96,446 negative sentiments (34.48%)**, nearly 1 in 3 customers had a poor experience. If even 20% of those customers churned, that represents ~19,000+ lost users and potentially millions in lost booking revenue.
+**🔴 34.48% Negative Sentiment — Revenue Risk:** Nearly 1 in 3 customers had a poor experience. At 20% churn, that's ~19,000+ lost users. → Implement automated host alert systems, verified quality badges, and recovery discount programs.
 
-**Recommended Actions:**
-- **Automated Host Alert System** — trigger a mandatory quality review if a host receives 3+ negative reviews within 30 days
-- **Verified Quality Badge** — incentivize hosts maintaining below 10% negative sentiment ratio
-- **Negative-to-Positive Recovery Program** — reach out to negative reviewers with discount coupons to win them back
+**🟡 10.5% Neutral — Untapped Growth Pool:** ~29,359 fence-sitters can be converted into promoters with post-stay micro-surveys, personalized follow-ups, and loyalty incentives.
 
----
+**📉 Post-2015 Positive Sentiment Decline:** Positive reviews peaked ~22,000–23,000 around 2015, then declined as rapid scaling diluted host quality. → Revisit onboarding standards, add visible sentiment scores on host profiles, and build sentiment forecasting.
 
-### 🟡 Finding 2 — Neutral Sentiments Are an Untapped Growth Pool
+**🏠 Entire Place — Biggest Asset, Biggest Risk:** Drives the highest positive sentiment (~1,00,000+) but also the highest negatives — a quality control problem at scale. → Enforce mandatory listing checklists, tiered pricing guidelines, and AI-powered listing audits.
 
-**29,359 neutral sentiments (10.5%)** represent fence-sitters who are neither satisfied nor dissatisfied. Converting just 50% (~14,679) into promoters could meaningfully boost word-of-mouth bookings and platform loyalty.
+**🚪 Private Room — Significant but Inconsistent:** Second largest sentiment driver in both directions. → Improve host-guest boundary guidelines, add privacy-specific search filters, and a Private Room Trust Program.
 
-**Recommended Actions:**
-- **Post-Stay Micro Survey** — identify exactly what stopped neutral reviewers from a positive experience
-- **Personalized Follow-Up Messaging** — ask what could have made the stay a 5-star experience
-- **Loyalty Incentives** — offer discounts or free experiences on the next booking
-- **Hotspot Room Type Tracking** — prioritize room types generating the most neutral reviews for quality improvement
+**🛏 Shared Room — Near-Zero Engagement:** Negligible sentiment volume signals critical low demand. → Audit viability and consider repositioning as budget/hostel-style stays.
 
----
-
-### 📉 Finding 3 — Post-2015 Decline in Positive Sentiments
-
-Positive sentiments **peaked at ~22,000–23,000 around 2015**, then declined steadily, reflecting scaling pains as Airbnb grew rapidly and host quality became harder to control.
-
-**Recommended Actions:**
-- **Benchmark Host Onboarding Standards** — compare current policies against 2013–2015 era standards to identify relaxed quality controls
-- **Visible Sentiment Score on Host Profiles** — create market pressure for hosts to maintain quality
-- **Sentiment Forecasting Model** — predict quarters likely to see sentiment dips and run proactive campaigns beforehand
-
----
-
-### 🏠 Finding 4 — "Entire Place" Is the Biggest Asset but Inconsistent
-
-Entire Place listings drive the **highest positive sentiment (~1,00,000+)** but also the highest negative sentiment among all room types — signaling a quality control problem at scale.
-
-**Recommended Actions:**
-- **Entire Place Standard Checklist** — mandatory checklist covering cleanliness, listing accuracy, and amenities
-- **Tiered Pricing Guidelines** — prevent overpricing relative to quality, a likely driver of negative sentiment
-- **AI-Powered Listing Audits** — flag listings where photos/descriptions mismatch actual guest reviews
-- **Superhost Fast Track** — reward high-positive-sentiment hosts with better search visibility
-
----
-
-### 🚪 Finding 5 — Private Room Is the Second Largest Sentiment Driver
-
-Private Room is **second highest in both positive and negative sentiments**, indicating a significant and engaged user base with room for experience optimization.
-
-**Recommended Actions:**
-- **Privacy and Boundary Guidelines** — establish clear host-guest boundary guidelines
-- **Private Room Specific Search Filters** — add filters like "Host rarely present", "Private entrance", "Dedicated bathroom" to set correct expectations
-- **Private Room Trust Program** — verified host status, clear house rules, and guest protection policies
-
----
-
-### 🛏 Finding 6 — Shared Room Has Near-Zero Engagement
-
-Shared Room has almost **negligible sentiment volume**, signaling either very low booking rates or very low review engagement — both are warning signs for this category's viability.
-
-**Recommended Actions:**
-- **Viability Audit** — analyze actual booking numbers; if critically low, consider phasing out or rebranding
-- **Reposition as Budget/Hostel-Style Stays** — remarket to backpackers and solo travelers
-- **Shared Room Community Features** — introduce traveler matching and shared itinerary tools to add value beyond accommodation
+📄 **Full detailed Sentiment Analysis Report:** [Click here](https://github.com/parmarth009/Global-Airbnb-Performance-Dashboard-Power-BI/blob/Dev/sentimental%20analysis%20report.pdf)
 
 ---
 
 ### 📝 Sentiment Analysis Conclusion
 
-📄 **Want to read the full detailed Sentiment Analysis Report?** [Click here](https://github.com/parmarth009/Global-Airbnb-Performance-Dashboard-Power-BI/blob/Dev/sentimental%20analysis%20report.pdf)
+With **55.02% positive sentiments**, Airbnb enjoys majority satisfaction — but the **34.48% negative rate** and post-2015 decline are clear warning signs. The biggest opportunities: converting 29,359 neutral customers into promoters, fixing quality inconsistency in Entire Place listings, and rebuilding Private Room trust. The **Net Sentiment Score of 57,461** is a strong baseline, but targeted programs can push it significantly higher.
 
-The analysis reveals that Airbnb sits at a critical inflection point. With **55.02% positive sentiments**, the brand enjoys majority customer satisfaction — but the **34.48% negative sentiment rate** and the steady post-2015 decline in positivity are clear warning signs.
+> Every percentage point shift from negative to positive represents thousands of retained customers and millions in recovered revenue.
 
-The biggest opportunities lie in:
-1. Converting 29,359 neutral customers into promoters
-2. Fixing quality inconsistency in Entire Place listings
-3. Rebuilding trust in Private Rooms
+---
 
-The **Net Sentiment Score of 57,461** is a strong baseline — but with targeted host quality programs, proactive recovery campaigns, and sentiment forecasting, this number can be pushed significantly higher.
+## 🎲 Monte Carlo Simulation Report
 
-> Every percentage point shift from negative to positive sentiment represents thousands of retained customers and millions in recovered revenue.
+> **Scope:** 1,00,000 booking scenarios simulated using listing attributes to estimate competitive win probability.
+
+### ⚙️ Problem Statement
+
+Estimate the probability of an Airbnb listing being booked compared to competing listings by simulating customer choices based on factors such as nightly price, review scores, and instant booking availability. Using Monte Carlo Simulation, thousands of booking scenarios are generated to evaluate how changes in these factors affect a listing's chances of securing a booking and outperforming competitors.
+
+### ⚙️ How It Was Calculated
+
+The simulation models customer decision-making across 1,00,000 randomized scenarios. For each scenario, a listing competes against randomly sampled competitors from the dataset. Win probability is calculated as the share of scenarios in which the listing is chosen, based on weighted factors: review score, price competitiveness, and instant booking status.
+
+The simulation was implemented in **Python (numpy, scipy)** via `airbnb_monte_carlo.py` and results were imported into Power BI.
+
+**Key stats used:** Avg Nightly Price: **$867.26** · Avg Rating: **93.4** · Avg Review Accuracy: **9.82** · Instant Bookable: **45.99%**
+
+---
+
+### 🔑 Key Findings & Recommendations
+
+**📊 Win Probability by Review Score:**
+
+| Review Score | Win Probability |
+|---|---|
+| 3.5 | ~44.6% |
+| 4.0 | ~46.6% |
+| 4.5 | ~48.0% |
+| 4.7 | ~48.6% |
+| 4.9 | ~50.1% |
+| 5.0 | ~50.8% |
+
+**🏆 The 4.9 Threshold is the Tipping Point:** A listing only starts consistently beating the majority of competitors at a review score of **4.9 and above**. Scores below 4.9 keep hosts in a sub-50% win rate, meaning they lose more bookings than they win in head-to-head scenarios.
+
+**📉 The Competitive Gap is Narrow but Decisive:** The win probability difference between a 3.5 and a 5.0 rated host is just **5.6 percentage points** — but in a high-volume market, this compounding disadvantage translates into significant lost revenue over time.
+
+**⚡ Instant Booking Amplifies the Effect:** With only **45.99% of listings being instantly bookable**, enabling instant booking provides a measurable edge — particularly for mid-range review scores where the margin between winning and losing bookings is smallest.
+
+**💰 Price Sensitivity:** At the market average of **$867.26/night**, price deviations in either direction affect win probability. Overpriced listings at lower review scores suffer the steepest drop in competitiveness.
+
+**Recommended Actions:**
+- **Target the 4.9 Score:** Coach hosts below 4.9 with specific improvement checklists to cross the majority-win threshold
+- **Enable Instant Booking:** Prioritize getting hosts below 50% win probability to enable instant booking for a quick competitive boost
+- **Price-Score Alignment:** Build a pricing recommendation tool that suggests optimal price ranges based on a host's current review score to maximize win probability
 
 ---
 
@@ -272,6 +232,8 @@ The **Net Sentiment Score of 57,461** is a strong baseline — but with targeted
 | Post-2015 sentiment decline | Signals onboarding standard erosion during rapid scaling |
 | 29,359 neutral reviews | Actionable conversion opportunity for loyalty programs |
 | Shared Room near-zero engagement | Category viability re-evaluation needed |
+| Win probability crosses 50% only at 4.9+ review score | Sets a clear quality benchmark for competitive hosts |
+| 5.6pp gap between 3.5 and 5.0 rated hosts | Small margin with large compounding revenue impact |
 
 ---
 
@@ -279,15 +241,19 @@ The **Net Sentiment Score of 57,461** is a strong baseline — but with targeted
 
 **Dashboard Overview**
 
-![Dashboard Overview](Overview.gif)
-
-**Ratings & Review Analysis**
-
-![Ratings Analysis](Ratings1.gif)
+![Dashboard Overview](1st%20page.gif)
 
 **Sentiment Analysis Dashboard**
 
-![Sentiment Analysis Dashboard](Sentimental%20Analysis%20Dashboard.gif)
+![Sentiment Analysis Dashboard](2nd%20page.gif)
+
+**Monte Carlo Simulation**
+
+![Monte Carlo Simulation](3rd%20page.gif)
+
+**Ratings & Review Analysis**
+
+![Ratings & Review Analysis](4th%20page.gif)
 
 ---
 
@@ -420,7 +386,7 @@ CALCULATE(
 ### Step 1 — Prerequisites
 
 - [Power BI Desktop](https://powerbi.microsoft.com/desktop/) (latest version)
-- [Python 3.x](https://www.python.org/downloads/) (for running the sentiment script)
+- [Python 3.x](https://www.python.org/downloads/) (for running the sentiment and Monte Carlo scripts)
 
 ### Step 2 — Download This Repository
 
@@ -435,7 +401,7 @@ Click the green **Code** button → **Download ZIP** → Extract on your compute
 Once downloaded:
 1. Extract the zip file
 2. You will get a folder called `Airbnb Data` containing 4 files:
-   - `Listings.csv` ← used for sentiment analysis
+   - `Listings.csv` ← used for sentiment analysis and Monte Carlo simulation
    - `Listings_data_dictionary.csv`
    - `Reviews.csv`
    - `Reviews_data_dictionary.csv`
@@ -450,6 +416,7 @@ Air-BNB-Dashboard/
 │       ├── Reviews.csv
 │       └── Reviews_data_dictionary.csv
 ├── sentiment.py
+├── airbnb_monte_carlo.py
 └── Air Bnb Dashboard.pbit
 ```
 
@@ -486,8 +453,34 @@ Air-BNB-Dashboard/
 │       ├── Reviews.csv
 │       └── Reviews_data_dictionary.csv
 ├── sentiment.py
+├── airbnb_monte_carlo.py
 └── Air Bnb Dashboard.pbit
 ```
+
+---
+
+### Step 3.6 — Run the Monte Carlo Simulation (Python)
+
+> ⚠️ This step is **required** for the Monte Carlo simulation page in the dashboard.
+
+The Monte Carlo simulation script `airbnb_monte_carlo.py` is **already included in this repository**. You do not need to write or download it separately.
+
+**Install the required Python libraries:**
+```bash
+pip install pandas numpy scipy
+```
+
+**Run the Monte Carlo script:**
+
+1. Copy `Listings.csv` from `data/raw/` into the same folder as `airbnb_monte_carlo.py`
+2. Open a terminal or command prompt in that folder
+3. Run:
+```bash
+python airbnb_monte_carlo.py
+```
+
+4. The output file will be generated in the same folder
+5. Move it into `data/raw/` alongside the other CSV files
 
 ---
 
@@ -518,6 +511,8 @@ Have questions about the data cleaning process, sentiment methodology, data mode
 - **Automate sentiment scoring pipeline using NLP models**
 - **Add sentiment trend alerts for hosts and cities**
 - **Build a neutral-reviewer conversion tracking dashboard**
+- **Extend Monte Carlo simulation with more competitive factors (amenities, location score, response rate)**
+- **Build an interactive what-if simulator for hosts to test pricing and quality scenarios**
 
 ---
 
@@ -527,4 +522,4 @@ Have questions about the data cleaning process, sentiment methodology, data mode
 
 ---
 
-> 📌 *This README reflects the `dev` branch, which includes the latest Sentiment Analysis layer built on top of the core performance dashboard.*
+> 📌 *This README reflects the `dev` branch, which includes the latest Sentiment Analysis and Monte Carlo Simulation layers built on top of the core performance dashboard.*

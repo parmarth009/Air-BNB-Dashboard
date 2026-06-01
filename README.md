@@ -239,21 +239,21 @@ The simulation was implemented in **Python (numpy, scipy)** via `airbnb_monte_ca
 
 ## 📸 Dashboard Preview
 
-**Dashboard Overview**
+**Page 1 — Dashboard Overview**
 
-![Dashboard Overview](1st%20page.gif)
+![Page 1 Overview](1st%20page.gif)
 
-**Sentiment Analysis Dashboard**
+**Page 2 — Sentiment Analysis**
 
-![Sentiment Analysis Dashboard](2nd%20page.gif)
+![Page 2 Sentiments](2nd%20page.gif)
 
-**Monte Carlo Simulation**
+**Page 3 — Monte Carlo Simulation**
 
-![Monte Carlo Simulation](3rd%20page.gif)
+![Page 3 Monte Carlo](3rd%20page.gif)
 
-**Ratings & Review Analysis**
+**Page 4 — Ratings & Review Analysis**
 
-![Ratings & Review Analysis](4th%20page.gif)
+![Page 4 Ratings](4th%20page.gif)
 
 ---
 
